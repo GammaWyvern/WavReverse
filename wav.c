@@ -101,7 +101,7 @@ int validateWav(char* wavByteData) {
 	}
 	if(*(short*)(wavByteData+22) != correctChannels) {
 		printf("Wave file's number of channels (%u) is not supported\n", *(short*)(wavByteData+22));
-		isValid = 0;
+		//isValid = 0;
 	}
 	if(*(int*)(wavByteData+4) != correctSize) {
 		printf("Wave file's size (%u) does not match assumed size (%u)\n", *(int*)(wavByteData+4), correctSize);
