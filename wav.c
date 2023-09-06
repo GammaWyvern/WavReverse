@@ -1,30 +1,30 @@
 #include <stdio.h>
 #include "file_lib.h"
-
-int reverseWav(const char* wavPath);
-int validateWav(char* wavByteData);
+#include "wav.h"
 
 size_t size;
-const char* sampleWavPath = "/home/keag/Github/WavReverse/honeyhive.wav";
-char* sampleWavByteData; 
 
 int main(int argc, char* argv[]) {
-	if(argc != 2) {
+	if(argc != 3) {
 		printf("\nIncorrect number of arguments.\n");
 		printf("Correct usage is:\n");
-		printf("\treversewav [.wav file]\n\n");
+		printf("\treversewav [src .wav file] [dest .wav file]\n\n");
 
 		return 1;
 	}
 
-	reverseWav(argv[1]);
-	// TODO do something with return error
+	reverseWav(argv[1], argv[2]);
+	// TODO do something with return error?
 }
 
-int reverseWav(const char* wavPath) {
+int reverseWav(const char* wavPath, const char* outputPath) {
 	// Get byte data for wav
 	char* wavByteData = read_file(wavPath, &size);
 
+	// NULL check
+	if(!wavByteData) {
+		return 1;
+	}
 	// Validate byte data for wav (for our specifications)
 	if(!validateWav(wavByteData)) {
 		return 1; // TODO add error code later?
@@ -51,8 +51,8 @@ int reverseWav(const char* wavPath) {
 	}
 	free(swapByteDataTemp);
 	
-	// Output reversed wavByteData to same file 
-	write_file(wavPath, wavByteData, size);
+	// Output reversed wavByteData new file 
+	write_file(outputPath, wavByteData, size);
 
 	// Cleanup allocation
 	free(wavByteData);
@@ -62,12 +62,6 @@ int reverseWav(const char* wavPath) {
 
 int validateWav(char* wavByteData) {
 	int isValid = 1;
-
-	// Initial NULL check
-	if(wavByteData == NULL) {
-		printf("Wave file does not exist");
-		return 1;
-	}	
 
 	// String checking
 	char* riff = "RIFF";
@@ -100,7 +94,7 @@ int validateWav(char* wavByteData) {
 		isValid = 0;
 	}
 	if(*(short*)(wavByteData+22) != correctChannels) {
-		printf("Wave file's number of channels (%u) is not supported\n", *(short*)(wavByteData+22));
+		printf("Wave file's number of channels (%u) is not fully supported... continuing\n", *(short*)(wavByteData+22));
 		//isValid = 0;
 	}
 	if(*(int*)(wavByteData+4) != correctSize) {
