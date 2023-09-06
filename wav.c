@@ -13,10 +13,11 @@ int main(int argc, char* argv[]) {
 		printf("\nIncorrect number of arguments.\n");
 		printf("Correct usage is:\n");
 		printf("\treversewav [.wav file]\n\n");
+
+		return 1;
 	}
 
-	// TODO replace sampleWav with argv[1]
-	reverseWav(sampleWavPath);
+	reverseWav(argv[1]);
 	// TODO do something with return error
 }
 
@@ -31,11 +32,9 @@ int reverseWav(const char* wavPath) {
 
 	// Setup variables needed for manipulation
 	const short bytesPerSample = wavByteData[32];
-	// TODO remove offset for final product
-	const short additionalOffset = 200; // For the file I am using, the data label is at 236-239
 
 	// Setup pointers to shift around samples
-	char* swapByteDataLower = wavByteData + 44 + additionalOffset;
+	char* swapByteDataLower = wavByteData + 44;
 	char* swapByteDataUpper = wavByteData + size - bytesPerSample; 
 	char* swapByteDataTemp = (char*)malloc(bytesPerSample*sizeof(char)); 
 
@@ -63,6 +62,12 @@ int reverseWav(const char* wavPath) {
 
 int validateWav(char* wavByteData) {
 	int isValid = 1;
+
+	// Initial NULL check
+	if(wavByteData == NULL) {
+		printf("Wave file does not exist");
+		return 1;
+	}	
 
 	// String checking
 	char* riff = "RIFF";
@@ -92,15 +97,15 @@ int validateWav(char* wavByteData) {
 	int correctChannels = 2;
 	unsigned int correctSize = size - 8;
 	if(*(short*)(wavByteData+20) != correctFormat) {
-		printf("Wave file's format is not supported\n");
+		printf("Wave file's format (%u) is not supported\n", *(short*)(wavByteData+20));
 		isValid = 0;
 	}
 	if(*(short*)(wavByteData+22) != correctChannels) {
-		printf("Wave file's number of channels is not supported\n");
+		printf("Wave file's number of channels (%u) is not supported\n", *(short*)(wavByteData+22));
 		isValid = 0;
 	}
 	if(*(int*)(wavByteData+4) != correctSize) {
-		printf("Wave file's size does not match assumed size\n");
+		printf("Wave file's size (%u) does not match assumed size (%u)\n", *(int*)(wavByteData+4), correctSize);
 		isValid = 0;
 	}
 
