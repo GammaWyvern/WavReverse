@@ -88,8 +88,7 @@ int validateWav(char* wavByteData) {
 	}
 	if(*((int*)(wavByteData+36)) != *((int*)(data))) {
 		printf("Wave file's data header is not in assumed spot\n");
-		// TODO my wav file has extra metadata, so this error occurs
-		//isValid = 0;
+		isValid = 0;
 	}
 
 	// Number checking
