@@ -56,6 +56,10 @@ int reverse_wave_file(struct wave_file* waveFile, const char* outputFilePath) {
 }
 
 int validate_wave_file(struct wave_file* waveFile) {
+	if(waveFile == NULL) {
+		return 0;
+	}
+
 	int isValid = 1;
 
 	// String checking
