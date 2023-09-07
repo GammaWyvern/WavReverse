@@ -1,89 +1,55 @@
+#include <stdio.h>
 #include "wav.h"
 #include "file_lib.h"
 
-size_t size;
-
 struct wave_file* load_wave(const char* filePath) {
+	size_t size;
 	char* waveByteData = read_file(filePath, &size);
-	struct wave_file* waveFile = (struct wave_file*)malloc(sizeof(struct wave_file));
-
-	// Setup header
-	struct wave_header* waveHeader = (struct wave_header*)malloc(sizeof(struct wave_header));
-	for(int offset=0; offset<44; offset++) {
-		(waveHeader->header)[offset] = waveByteData[offset];
+	if(waveByteData == NULL) {
+		return NULL;
 	}
-	waveFile->waveHeader = waveHeader;
-	
-	// Setup size
+
+	// Setup waveFile
+	struct wave_file* waveFile = (struct wave_file*)malloc(sizeof(struct wave_file));
+	waveFile->waveHeader = create_wave_header(waveByteData);
 	waveFile->fileSize = size;
-	
-	// Setup dataPointer
 	waveFile->dataPointer = waveByteData + 44;
 }
 
+struct wave_header* create_wave_header(char* headerData) {
+	struct wave_header* waveFileHeader = (struct wave_header*)malloc(sizeof(struct wave_header));
+	waveFileHeader->header = headerData;
+	waveFileHeader->channels = headerData[22];
+	waveFileHeader->bytesPerSample = headerData[32];
+	waveFileHeader->dataSize = headerData[40];
 
-
-
-
-/*
-
-int main(int argc, char* argv[]) {
-	if(argc != 3) {
-		printf("\nIncorrect number of arguments.\n");
-		printf("Correct usage is:\n");
-		printf("\treversewav [src .wav file] [dest .wav file]\n\n");
-
-		return 1;
-	}
-
-	reverseWav(argv[1], argv[2]);
-	// TODO do something with return error?
+	return waveFileHeader;
 }
 
-int reverseWav(const char* wavPath, const char* outputPath) {
-	// Get byte data for wav
-	char* wavByteData = read_file(wavPath, &size);
-
-	// NULL check
-	if(!wavByteData) {
-		return 1;
-	}
-	// Validate byte data for wav (for our specifications)
-	if(!validateWav(wavByteData)) {
-		return 1; // TODO add error code later?
-	}
-
-	// Setup variables needed for manipulation
-	const short bytesPerSample = wavByteData[32];
-
+int reverse_wave_file(struct wave_file* waveFile, const char* outputFilePath) {
 	// Setup pointers to shift around samples
-	char* swapByteDataLower = wavByteData + 44;
-	char* swapByteDataUpper = wavByteData + size - bytesPerSample; 
-	char* swapByteDataTemp = (char*)malloc(bytesPerSample*sizeof(char)); 
+	char* swapByteDataLower = waveFile->dataPointer;
+	char* swapByteDataUpper = waveFile->waveHeader->header + waveFile->fileSize;
+	char* swapByteDataTemp = (char*)malloc(waveFile->waveHeader->bytesPerSample*sizeof(char)); 
 
 	// Swap around samples to reverse their order
 	while(swapByteDataLower < swapByteDataUpper) {
-		for(int sampleByte=0; sampleByte<bytesPerSample; sampleByte++) {
+		for(int sampleByte=0; sampleByte<waveFile->waveHeader->bytesPerSample; sampleByte++) {
 			swapByteDataTemp[sampleByte] = swapByteDataLower[sampleByte]; 
 			swapByteDataLower[sampleByte] = swapByteDataUpper[sampleByte]; 
 			swapByteDataUpper[sampleByte] = swapByteDataTemp[sampleByte]; 
 		}
 
-		swapByteDataLower += bytesPerSample;
-		swapByteDataUpper -= bytesPerSample;
+		swapByteDataLower += waveFile->waveHeader->bytesPerSample;
+		swapByteDataUpper -= waveFile->waveHeader->bytesPerSample;
 	}
 	free(swapByteDataTemp);
 	
 	// Output reversed wavByteData new file 
-	write_file(outputPath, wavByteData, size);
-
-	// Cleanup allocation
-	free(wavByteData);
-
-	return 0; // TODO change to error code later?
+	write_file(outputFilePath, waveFile->waveHeader->header, waveFile->fileSize);
 }
 
-int validateWav(char* wavByteData) {
+int validate_wave_file(struct wave_file* waveFile) {
 	int isValid = 1;
 
 	// String checking
@@ -91,19 +57,20 @@ int validateWav(char* wavByteData) {
 	char* wave = "WAVE";
 	char* fmt  = "fmt ";
 	char* data = "data";
-	if(*((int*)(wavByteData+0)) != *((int*)(riff))) {
+	
+	if(*((int*)(waveFile->waveHeader->header+0)) != *((int*)(riff))) {
 		printf("Not a RIFF compliant file\n");
 		isValid = 0;
 	}
-	if(*((int*)(wavByteData+8)) != *((int*)(wave))) {
+	if(*((int*)(waveFile->waveHeader->header+8)) != *((int*)(wave))) {
 		printf("Not a WAVE compliant file\n");
 		isValid = 0;
 	}
-	if(*((int*)(wavByteData+12)) != *((int*)(fmt))) {
+	if(*((int*)(waveFile->waveHeader->header+12)) != *((int*)(fmt))) {
 		printf("Wave file's format is not supported\n");
 		isValid = 0;
 	}
-	if(*((int*)(wavByteData+36)) != *((int*)(data))) {
+	if(*((int*)(waveFile->waveHeader->header+36)) != *((int*)(data))) {
 		printf("Wave file's data header is not in assumed spot\n");
 		isValid = 0;
 	}
@@ -111,21 +78,20 @@ int validateWav(char* wavByteData) {
 	// Number checking
 	int correctFormat = 1;
 	int correctChannels = 2;
-	unsigned int correctSize = size - 8;
-	if(*(short*)(wavByteData+20) != correctFormat) {
-		printf("Wave file's format (%u) is not supported\n", *(short*)(wavByteData+20));
+	unsigned int correctSize = waveFile->fileSize - 8;
+	if(*(short*)(waveFile->waveHeader->header+20) != correctFormat) {
+		printf("Wave file's format (%u) is not supported\n", *(short*)(waveFile->waveHeader->header+20));
 		isValid = 0;
 	}
-	if(*(short*)(wavByteData+22) != correctChannels) {
-		printf("Wave file's number of channels (%u) is not fully supported... continuing\n", *(short*)(wavByteData+22));
+	if(*(short*)(waveFile->waveHeader->header+22) != correctChannels) {
+		printf("Wave file's number of channels (%u) is not fully supported... continuing\n", *(short*)(waveFile->waveHeader->header+22));
 		//isValid = 0;
 	}
-	if(*(int*)(wavByteData+4) != correctSize) {
-		printf("Wave file's size (%u) does not match assumed size (%u)\n", *(int*)(wavByteData+4), correctSize);
+	if(*(int*)(waveFile->waveHeader->header+4) != correctSize) {
+		printf("Wave file's size (%u) does not match assumed size (%u)\n", *(int*)(waveFile->waveHeader->header+4), correctSize);
 		isValid = 0;
 	}
 
 	return isValid;
 }
 
-*/

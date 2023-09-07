@@ -3,6 +3,9 @@
 
 struct wave_header {
 	char* header;
+	short channels;
+	short bytesPerSample;
+	int dataSize;
 };
 
 struct wave_file {
@@ -11,11 +14,9 @@ struct wave_file {
 	char* dataPointer;
 };
 
-struct wave_header* create_wave_header(const char* headerData);
+struct wave_header* create_wave_header(char* headerData);
 struct wave_file* load_wave(const char* filePath);
-int create_wave_file(struct wave_file, const char* filePath);
-
-int reverseWav(const char* wavPath, const char* outputPath);
-int validateWav(char* wavByteData);
+int reverse_wave_file(struct wave_file*, const char* filePath);
+int validate_wave_file(struct wave_file* waveFile);
 
 #endif
