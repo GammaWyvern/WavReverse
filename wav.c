@@ -14,6 +14,8 @@ struct wave_file* load_wave(const char* filePath) {
 	waveFile->waveHeader = create_wave_header(waveByteData);
 	waveFile->fileSize = size;
 	waveFile->dataPointer = waveByteData + 44;
+
+	return waveFile;
 }
 
 struct wave_header* create_wave_header(char* headerData) {
@@ -46,7 +48,11 @@ int reverse_wave_file(struct wave_file* waveFile, const char* outputFilePath) {
 	free(swapByteDataTemp);
 	
 	// Output reversed wavByteData new file 
-	write_file(outputFilePath, waveFile->waveHeader->header, waveFile->fileSize);
+	if(!write_file(outputFilePath, waveFile->waveHeader->header, waveFile->fileSize)) {
+		return 1;
+	}
+
+	return 0;
 }
 
 int validate_wave_file(struct wave_file* waveFile) {
