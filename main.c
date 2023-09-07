@@ -6,7 +6,7 @@ int main(int argc, char* argv[]) {
 	if(argc != 3) {
 		printf("\nIncorrect number of arguments.\n");
 		printf("Correct usage is:\n");
-		printf("\treversewav [src .wav file] [dest .wav file]\n\n");
+		printf("\treversewave [src .wav file] [dest .wav file]\n\n");
 		return 1;
 	}
 
