@@ -31,7 +31,7 @@ struct wave_header* create_wave_header(char* headerData) {
 int reverse_wave_file(struct wave_file* waveFile, const char* outputFilePath) {
 	// Setup pointers to shift around samples
 	char* swapByteDataLower = waveFile->dataPointer;
-	char* swapByteDataUpper = waveFile->waveHeader->header + waveFile->fileSize;
+	char* swapByteDataUpper = waveFile->waveHeader->header + waveFile->fileSize - waveFile->waveHeader->bytesPerSample;
 	char* swapByteDataTemp = (char*)malloc(waveFile->waveHeader->bytesPerSample*sizeof(char)); 
 
 	// Swap around samples to reverse their order
