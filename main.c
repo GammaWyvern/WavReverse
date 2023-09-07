@@ -21,7 +21,8 @@ int main(int argc, char* argv[]) {
 	// Reverse Wave file data and output
 	reverse_wave_file(waveFile, argv[2]);
 
-	// TODO also need to free header???
+	free(waveFile->waveHeader->header);
+	free(waveFile->waveHeader);
 	free(waveFile);
 
 	return 0;
