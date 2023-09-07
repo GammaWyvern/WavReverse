@@ -21,9 +21,8 @@ int main(int argc, char* argv[]) {
 	// Reverse Wave file data and output
 	reverse_wave_file(waveFile, argv[2]);
 
-	free(waveFile->waveHeader->header);
-	free(waveFile->waveHeader);
-	free(waveFile);
+	// Deallocate memory for waveFile
+	free_wave_file(waveFile);
 
 	return 0;
 }

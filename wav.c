@@ -105,3 +105,9 @@ int validate_wave_file(struct wave_file* waveFile) {
 	return isValid;
 }
 
+void free_wave_file(struct wave_file* waveFile) {
+	free(waveFile->waveHeader->header);
+	free(waveFile->waveHeader);
+	free(waveFile);
+}
+
