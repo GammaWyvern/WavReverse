@@ -1,5 +1,5 @@
-#ifndef __H_LIB__
-#define __H_LIB__
+#ifndef __H_WAVE_LIB__
+#define __H_WAVE_LIB__
 
 struct wave_header {
 	char* header;
