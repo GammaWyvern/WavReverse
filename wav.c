@@ -1,8 +1,31 @@
-#include <stdio.h>
-#include "file_lib.h"
 #include "wav.h"
+#include "file_lib.h"
 
 size_t size;
+
+struct wave_file* load_wave(const char* filePath) {
+	char* waveByteData = read_file(filePath, &size);
+	struct wave_file* waveFile = (struct wave_file*)malloc(sizeof(struct wave_file));
+
+	// Setup header
+	struct wave_header* waveHeader = (struct wave_header*)malloc(sizeof(struct wave_header));
+	for(int offset=0; offset<44; offset++) {
+		(waveHeader->header)[offset] = waveByteData[offset];
+	}
+	waveFile->waveHeader = waveHeader;
+	
+	// Setup size
+	waveFile->fileSize = size;
+	
+	// Setup dataPointer
+	waveFile->dataPointer = waveByteData + 44;
+}
+
+
+
+
+
+/*
 
 int main(int argc, char* argv[]) {
 	if(argc != 3) {
@@ -105,3 +128,4 @@ int validateWav(char* wavByteData) {
 	return isValid;
 }
 
+*/
