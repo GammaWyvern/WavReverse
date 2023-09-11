@@ -14,10 +14,95 @@ struct wave_file {
 	char* dataPointer;
 };
 
+/***********************************************************
+ *
+ * Creates wave_header with data from a byte data array.
+ * Use read_file() to easily get a wave byte data array.  
+ *
+ * Args:
+ * 	headerData: A pointer to a 44 byte long array of header data
+ *
+ * Returns:
+ * 	A pointer to the newly created wave_header  
+ *
+ **********************************************************/
+// TODO this should really be private. Only load_wave
+// should actually use create_wave_header.
 struct wave_header* create_wave_header(char* headerData);
+
+/***********************************************************
+ *
+ * Creates a wave_file rom a wave file on disk.
+ * Call free_wave_file() when finished to free all related
+ * memory allocated to prevent memory leaks.
+ *
+ * Args:
+ * 	filePath: A path to a wave file 
+ *
+ * Returns:
+ * 	A pointer to the newely created wave_file if succesful.
+ * 	NULL if unsuccesful.
+ *
+ **********************************************************/
 struct wave_file* load_wave(const char* filePath);
-int reverse_wave_file(struct wave_file*, const char* filePath);
+
+/***********************************************************
+ *
+ * Reverses the samples in a wave_file and write the altered
+ * wave_file to the file path passed.
+ *
+ * Args:
+ * 	waveFile: wave_file to reverse samples in
+ * 	filePath: file path to output reversed waveFile to
+ *
+ * Return:
+ * 	0 if waveFile was succesfully reversed and written
+ * 		back to filePath
+ * 	1 if waveFile was sucesfully reversed but not 
+ * 		written to filePath
+ *
+ **********************************************************/
+int reverse_wave_file(struct wave_file* waveFile, const char* filePath);
+
+/***********************************************************
+ *
+ * Ensures a wave_file meets specific criteria by checking
+ * its header and prints out any critia not met.
+ * Criteria:
+ * 	waveFile is not NULL
+ * 	waveFile contains "RIFF" in header bytes 0-3
+ * 	waveFile contains "WAVE" in header bytes 8-11
+ * 	waveFile contains "fmt " in header bytes 12-15
+ * 	waveFile contains "data" in header bytes 36-39
+ * 	waveFile has a format value of 1 in header bytes 20-21
+ * 	waveFile has the size of the wave file - 8 in bytes 4-7
+ * 	waveFile has 2 channels in bytes 22-23
+ * TODO update for channels
+ *
+ * Args:
+ * 	waveFile: wave file to validate based on criteria
+ *
+ * Returns:
+ * 	1 if waveFile is valid and meets criteria
+ * 	0 if waveFile is not valid and doesn't meet all criteria
+ *
+ **********************************************************/
 int validate_wave_file(struct wave_file* waveFile);
+
+/***********************************************************
+ *
+ * Frees all memory allocated from the wave_file created
+ * from calling load_file().
+ *
+ * Args:
+ * 	waveFile: wave_file to free  
+ *
+ **********************************************************/
 void free_wave_file(struct wave_file* waveFile);
+
+// TODO add free_wave_header?????
+// If you can create a wave_header by yourself, you need to be
+// able to free it, which means freeing the header and the 
+// header header
 
 #endif
