@@ -10,7 +10,7 @@ struct wave_file* load_wave(const char* filePath) {
 	}
 
 	// Setup waveFile
-	struct wave_file* waveFile = (struct wave_file*)malloc(sizeof(struct wave_file));
+	struct wave_file* waveFile = malloc(sizeof(struct wave_file));
 	waveFile->waveHeader = create_wave_header(waveByteData);
 	waveFile->fileSize = size;
 	waveFile->dataPointer = waveByteData + 44;
@@ -19,11 +19,11 @@ struct wave_file* load_wave(const char* filePath) {
 }
 
 struct wave_header* create_wave_header(char* headerData) {
-	struct wave_header* waveFileHeader = (struct wave_header*)malloc(sizeof(struct wave_header));
+	struct wave_header* waveFileHeader = malloc(sizeof(struct wave_header));
 	waveFileHeader->header = headerData;
-	waveFileHeader->channels = headerData[22];
-	waveFileHeader->bytesPerSample = headerData[32];
-	waveFileHeader->dataSize = headerData[40];
+	waveFileHeader->channels = *(unsigned short*)(headerData+22);
+	waveFileHeader->bytesPerSample = *(unsigned short*)(headerData+32);
+	waveFileHeader->dataSize = *(unsigned int*)(headerData+40);
 
 	return waveFileHeader;
 }
@@ -31,10 +31,10 @@ struct wave_header* create_wave_header(char* headerData) {
 int reverse_wave_file(struct wave_file* waveFile, const char* outputFilePath) {
 	// Setup pointers to shift around samples
 	char* swapByteDataLower = waveFile->dataPointer;
-	char* swapByteDataUpper = waveFile->waveHeader->header + waveFile->fileSize - waveFile->waveHeader->bytesPerSample;
-	char* swapByteDataTemp = (char*)malloc(waveFile->waveHeader->bytesPerSample*sizeof(char)); 
+	char* swapByteDataUpper = waveFile->dataPointer + waveFile->waveHeader->dataSize - waveFile->waveHeader->bytesPerSample;
+	char* swapByteDataTemp = malloc(waveFile->waveHeader->bytesPerSample*sizeof(char)); 
 
-	// Swap around samples to reverse their order
+	// Swap around samples byte by byte to reverse their order
 	while(swapByteDataLower < swapByteDataUpper) {
 		for(int sampleByte=0; sampleByte<waveFile->waveHeader->bytesPerSample; sampleByte++) {
 			swapByteDataTemp[sampleByte] = swapByteDataLower[sampleByte]; 
@@ -48,7 +48,7 @@ int reverse_wave_file(struct wave_file* waveFile, const char* outputFilePath) {
 	free(swapByteDataTemp);
 	
 	// Output reversed wavByteData new file 
-	if(!write_file(outputFilePath, waveFile->waveHeader->header, waveFile->fileSize)) {
+	if(write_file(outputFilePath, waveFile->waveHeader->header, waveFile->fileSize)) {
 		return 1;
 	}
 
@@ -68,26 +68,28 @@ int validate_wave_file(struct wave_file* waveFile) {
 	char* fmt  = "fmt ";
 	char* data = "data";
 	
-	if(*((int*)(waveFile->waveHeader->header+0)) != *((int*)(riff))) {
+	if(*(int*)(waveFile->waveHeader->header+0) != *((int*)(riff))) {
 		printf("Not a RIFF compliant file\n");
-		isValid = 0;
+		// Doesn't make sense to continue if not RIFF file
+		return 0;
 	}
-	if(*((int*)(waveFile->waveHeader->header+8)) != *((int*)(wave))) {
+	if(*(int*)(waveFile->waveHeader->header+8) != *((int*)(wave))) {
 		printf("Not a WAVE compliant file\n");
-		isValid = 0;
+		// Doesn't make sense to continue if not WAVE file
+		return 0;
 	}
-	if(*((int*)(waveFile->waveHeader->header+12)) != *((int*)(fmt))) {
+	if(*(int*)(waveFile->waveHeader->header+12) != *((int*)(fmt))) {
 		printf("Wave file's format is not supported\n");
 		isValid = 0;
 	}
-	if(*((int*)(waveFile->waveHeader->header+36)) != *((int*)(data))) {
+	if(*(int*)(waveFile->waveHeader->header+36) != *((int*)(data))) {
 		printf("Wave file's data header is not in assumed spot\n");
 		isValid = 0;
 	}
 
 	// Number checking
-	int correctFormat = 1;
-	int correctChannels = 2;
+	unsigned int correctFormat = 1;
+	unsigned int correctChannels = 2;
 	unsigned int correctSize = waveFile->fileSize - 8;
 	if(*(short*)(waveFile->waveHeader->header+20) != correctFormat) {
 		printf("Wave file's format (%u) is not supported\n", *(short*)(waveFile->waveHeader->header+20));

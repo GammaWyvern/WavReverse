@@ -13,16 +13,19 @@ int main(int argc, char* argv[]) {
 	// Create Wave file data
 	struct wave_file* waveFile = load_wave(argv[1]);
 
-	// Verify Wave file data
+	// Verify Wave file data (contains NULL check)
 	if(!validate_wave_file(waveFile)) {
+		free_wave_file(waveFile);
 		return 1;
 	}
 
-	// Reverse Wave file data and output
-	reverse_wave_file(waveFile, argv[2]);
+	// Reverse Wave file data and output to file
+	if(reverse_wave_file(waveFile, argv[2])) {
+		free_wave_file(waveFile);
+		return 1;
+	}
 
-	// Deallocate memory for waveFile
+	// Deallocate memory for waveFile if no error
 	free_wave_file(waveFile);
-
 	return 0;
 }

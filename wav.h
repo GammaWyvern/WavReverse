@@ -3,14 +3,14 @@
 
 struct wave_header {
 	char* header;
-	short channels;
-	short bytesPerSample;
-	int dataSize;
+	unsigned short channels;
+	unsigned short bytesPerSample;
+	unsigned int dataSize;
 };
 
 struct wave_file {
 	struct wave_header* waveHeader;
-	int fileSize;
+	unsigned int fileSize;
 	char* dataPointer;
 };
 
