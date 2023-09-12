@@ -21,8 +21,9 @@ struct wave_file* load_wave(const char* filePath) {
 struct wave_header* create_wave_header(char* headerData) {
 	struct wave_header* waveFileHeader = malloc(sizeof(struct wave_header));
 	waveFileHeader->header = headerData;
-	waveFileHeader->channels = *(unsigned short*)(headerData+22);
-	waveFileHeader->bytesPerSample = *(unsigned short*)(headerData+32);
+	waveFileHeader->channels = *(short*)(headerData+22);
+	waveFileHeader->formatType = *(short*)(headerData+20);
+	waveFileHeader->bytesPerSample = *(short*)(headerData+32);
 	waveFileHeader->dataSize = *(unsigned int*)(headerData+40);
 
 	return waveFileHeader;
@@ -68,6 +69,9 @@ int validate_wave_file(struct wave_file* waveFile) {
 	char* fmt  = "fmt ";
 	char* data = "data";
 	
+	// You're gonna love this shit, it's beautiful!
+	// Just cast all the pointers to ints to read 4 bytes! Boom!
+	// No library or complex code needed!
 	if(*(int*)(waveFile->waveHeader->header+0) != *((int*)(riff))) {
 		printf("Not a RIFF compliant file\n");
 		// Doesn't make sense to continue if not RIFF file
@@ -88,18 +92,18 @@ int validate_wave_file(struct wave_file* waveFile) {
 	}
 
 	// Number checking
-	unsigned int correctFormat = 1;
-	unsigned int correctChannels = 2;
+	short correctFormat = 1;
+	short correctChannels = 2;
 	unsigned int correctSize = waveFile->fileSize - 8;
-	if(*(short*)(waveFile->waveHeader->header+20) != correctFormat) {
-		printf("Wave file's format (%u) is not supported\n", *(short*)(waveFile->waveHeader->header+20));
+	if(waveFile->waveHeader->formatType) != correctFormat) {
+		printf("Wave file's format (%hi) is not supported\n", *(short*)(waveFile->waveHeader->header+20));
 		isValid = 0;
 	}
-	if(*(short*)(waveFile->waveHeader->header+22) != correctChannels) {
-		printf("Wave file's number of channels (%u) is not supported\n", *(short*)(waveFile->waveHeader->header+22));
+	if(waveFile->waveHeader->channels != correctChannels) {
+		printf("Wave file's number of channels (%hi) is not supported\n", *(short*)(waveFile->waveHeader->header+22));
 		isValid = 0;
 	}
-	if(*(int*)(waveFile->waveHeader->header+4) != correctSize) {
+	if(waveFile->fileSize != correctSize) {
 		printf("Wave file's size (%u) does not match assumed size (%u)\n", *(int*)(waveFile->waveHeader->header+4), correctSize);
 		isValid = 0;
 	}
@@ -112,6 +116,13 @@ void free_wave_file(struct wave_file* waveFile) {
 		free(waveFile->waveHeader->header);
 		free(waveFile->waveHeader);
 		free(waveFile);
+	}
+}
+
+void free_wave_header(struct wave_header* waveHeader) {
+	if(waveHeader != NULL) {
+		free(waveHeader->header);
+		free(waveHeader);
 	}
 }
 

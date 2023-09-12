@@ -3,8 +3,9 @@
 
 struct wave_header {
 	char* header;
-	unsigned short channels;
-	unsigned short bytesPerSample;
+	short channels;
+	short formatType;
+	short bytesPerSample;
 	unsigned int dataSize;
 };
 
@@ -18,6 +19,8 @@ struct wave_file {
  *
  * Creates a wave_header from a wave byte data array.
  * Use read_file() to easily get a wave byte data array.  
+ * Use free_wave_header() when finished to free all
+ * related memeory allocated.
  *
  * Args:
  * 	headerData: A pointer to 44 bytes of wave header data
@@ -26,15 +29,13 @@ struct wave_file {
  * 	A pointer to the newly created wave_header  
  *
  **********************************************************/
-// TODO this should really be private. Only load_wave
-// should actually use create_wave_header.
 struct wave_header* create_wave_header(char* headerData);
 
 /***********************************************************
  *
  * Creates a wave_file from a wave file on disk.
- * Call free_wave_file() when finished to free all related
- * memory allocated to prevent memory leaks.
+ * Use free_wave_file() when finished to free all
+ * related memory allocated.
  *
  * Args:
  * 	filePath: A path to a wave file 
@@ -49,7 +50,7 @@ struct wave_file* load_wave(const char* filePath);
 /***********************************************************
  *
  * Reverses the samples in a wave_file and writes the
- * altered wave_file to the file path passed.
+ * newly altered wave_file to the file path passed.
  *
  * Args:
  * 	waveFile: A pointer to a wave_file to reverse samples in
@@ -92,17 +93,23 @@ int validate_wave_file(struct wave_file* waveFile);
 /***********************************************************
  *
  * Frees all memory allocated from a wave_file created
- * with load_file().
+ * with load_wave().
  *
  * Args:
- * 	waveFile: A pointer to a wave_file to free  
+ * 	waveFile: A pointer to the wave_file to free  
  *
  **********************************************************/
 void free_wave_file(struct wave_file* waveFile);
 
-// TODO add free_wave_header?????
-// If you can create a wave_header by yourself, you need to be
-// able to free it, which means freeing the header and the 
-// header header
+/***********************************************************
+ *
+ * Frees all memory allocated from a wave_header created
+ * with create_wave_header().
+ *
+ * Args:
+ * 	waveHeader: A pointer to the wave_header to free  
+ *
+ **********************************************************/
+void free_wave_file(struct wave_file* waveFile);
 
 #endif
