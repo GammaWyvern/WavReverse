@@ -16,11 +16,11 @@ struct wave_file {
 
 /***********************************************************
  *
- * Creates wave_header with data from a byte data array.
+ * Creates a wave_header from a wave byte data array.
  * Use read_file() to easily get a wave byte data array.  
  *
  * Args:
- * 	headerData: A pointer to a 44 byte long array of header data
+ * 	headerData: A pointer to 44 bytes of wave header data
  *
  * Returns:
  * 	A pointer to the newly created wave_header  
@@ -32,7 +32,7 @@ struct wave_header* create_wave_header(char* headerData);
 
 /***********************************************************
  *
- * Creates a wave_file rom a wave file on disk.
+ * Creates a wave_file from a wave file on disk.
  * Call free_wave_file() when finished to free all related
  * memory allocated to prevent memory leaks.
  *
@@ -48,8 +48,8 @@ struct wave_file* load_wave(const char* filePath);
 
 /***********************************************************
  *
- * Reverses the samples in a wave_file and write the altered
- * wave_file to the file path passed.
+ * Reverses the samples in a wave_file and writes the
+ * altered wave_file to the file path passed.
  *
  * Args:
  * 	waveFile: wave_file to reverse samples in
@@ -75,8 +75,8 @@ int reverse_wave_file(struct wave_file* waveFile, const char* filePath);
  * 	waveFile contains "fmt " in header bytes 12-15
  * 	waveFile contains "data" in header bytes 36-39
  * 	waveFile has a format value of 1 in header bytes 20-21
- * 	waveFile has the size of the wave file - 8 in bytes 4-7
- * 	waveFile has 2 channels in bytes 22-23
+ * 	waveFile has the size of the wave file - 8 in header bytes 4-7
+ * 	waveFile has 2 channels in header bytes 22-23
  * TODO update for channels
  *
  * Args:
@@ -91,8 +91,8 @@ int validate_wave_file(struct wave_file* waveFile);
 
 /***********************************************************
  *
- * Frees all memory allocated from the wave_file created
- * from calling load_file().
+ * Frees all memory allocated from a wave_file created
+ * with load_file().
  *
  * Args:
  * 	waveFile: wave_file to free  
