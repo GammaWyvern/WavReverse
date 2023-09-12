@@ -52,7 +52,7 @@ struct wave_file* load_wave(const char* filePath);
  * altered wave_file to the file path passed.
  *
  * Args:
- * 	waveFile: wave_file to reverse samples in
+ * 	waveFile: A pointer to a wave_file to reverse samples in
  * 	filePath: file path to output reversed waveFile to
  *
  * Return:
@@ -95,7 +95,7 @@ int validate_wave_file(struct wave_file* waveFile);
  * with load_file().
  *
  * Args:
- * 	waveFile: wave_file to free  
+ * 	waveFile: A pointer to a wave_file to free  
  *
  **********************************************************/
 void free_wave_file(struct wave_file* waveFile);
