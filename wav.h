@@ -6,12 +6,13 @@ struct wave_header {
 	short channels;
 	short formatType;
 	short bytesPerSample;
+	unsigned int assumedSize;
 	unsigned int dataSize;
 };
 
 struct wave_file {
 	struct wave_header* waveHeader;
-	unsigned int fileSize;
+	int fileSize;
 	char* dataPointer;
 };
 

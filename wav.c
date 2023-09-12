@@ -24,6 +24,7 @@ struct wave_header* create_wave_header(char* headerData) {
 	waveFileHeader->channels = *(short*)(headerData+22);
 	waveFileHeader->formatType = *(short*)(headerData+20);
 	waveFileHeader->bytesPerSample = *(short*)(headerData+32);
+	waveFileHeader->assumedSize = *(unsigned int*)(headerData+4);
 	waveFileHeader->dataSize = *(unsigned int*)(headerData+40);
 
 	return waveFileHeader;
@@ -94,17 +95,17 @@ int validate_wave_file(struct wave_file* waveFile) {
 	// Number checking
 	short correctFormat = 1;
 	short correctChannels = 2;
-	unsigned int correctSize = waveFile->fileSize - 8;
-	if(waveFile->waveHeader->formatType) != correctFormat) {
-		printf("Wave file's format (%hi) is not supported\n", *(short*)(waveFile->waveHeader->header+20));
+	int correctSize = waveFile->fileSize - 8;
+	if(waveFile->waveHeader->formatType != correctFormat) {
+		printf("Wave file's format (%hi) is not supported\n", waveFile->waveHeader->formatType); 
 		isValid = 0;
 	}
 	if(waveFile->waveHeader->channels != correctChannels) {
-		printf("Wave file's number of channels (%hi) is not supported\n", *(short*)(waveFile->waveHeader->header+22));
+		printf("Wave file's number of channels (%hi) is not supported\n", waveFile->waveHeader->channels);
 		isValid = 0;
 	}
-	if(waveFile->fileSize != correctSize) {
-		printf("Wave file's size (%u) does not match assumed size (%u)\n", *(int*)(waveFile->waveHeader->header+4), correctSize);
+	if(waveFile->waveHeader->assumedSize != correctSize) {
+		printf("Wave file's size (%d) does not match assumed size (%d)\n", waveFile->fileSize, correctSize);
 		isValid = 0;
 	}
 
