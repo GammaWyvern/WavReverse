@@ -96,8 +96,8 @@ int validate_wave_file(struct wave_file* waveFile) {
 		isValid = 0;
 	}
 	if(*(short*)(waveFile->waveHeader->header+22) != correctChannels) {
-		printf("Wave file's number of channels (%u) is not fully supported... ignoring\n", *(short*)(waveFile->waveHeader->header+22));
-		//isValid = 0;
+		printf("Wave file's number of channels (%u) is not supported\n", *(short*)(waveFile->waveHeader->header+22));
+		isValid = 0;
 	}
 	if(*(int*)(waveFile->waveHeader->header+4) != correctSize) {
 		printf("Wave file's size (%u) does not match assumed size (%u)\n", *(int*)(waveFile->waveHeader->header+4), correctSize);
