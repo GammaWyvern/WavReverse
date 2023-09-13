@@ -21,10 +21,18 @@ struct wave_file* load_wave(const char* filePath) {
 struct wave_header* create_wave_header(char* headerData) {
 	struct wave_header* waveFileHeader = malloc(sizeof(struct wave_header));
 	waveFileHeader->header = headerData;
-	waveFileHeader->channels = *(short*)(headerData+22);
-	waveFileHeader->formatType = *(short*)(headerData+20);
-	waveFileHeader->bytesPerSample = *(short*)(headerData+32);
+	waveFileHeader->fileContainer = (headerData+0);
 	waveFileHeader->assumedSize = *(unsigned int*)(headerData+4);
+	waveFileHeader->fileType = (headerData+8);
+	waveFileHeader->formatChunk = (headerData+12);
+	waveFileHeader->formatLength = *(unsigned int*)(headerData+16);
+	waveFileHeader->formatType = *(unsigned short*)(headerData+20);
+	waveFileHeader->channels = *(unsigned short*)(headerData+22);
+	waveFileHeader->sampleRate = *(unsigned int*)(headerData+24);
+	waveFileHeader->bytesPerSecond = *(unsigned int*)(headerData+28);
+	waveFileHeader->bytesPerSample = *(unsigned short*)(headerData+32);
+	waveFileHeader->bitsPerSample = *(unsigned short*)(headerData+34);
+	waveFileHeader->dataLabel = (headerData+36);
 	waveFileHeader->dataSize = *(unsigned int*)(headerData+40);
 
 	return waveFileHeader;
@@ -50,11 +58,7 @@ int reverse_wave_file(struct wave_file* waveFile, const char* outputFilePath) {
 	free(swapByteDataTemp);
 	
 	// Output reversed wavByteData new file 
-	if(write_file(outputFilePath, waveFile->waveHeader->header, waveFile->fileSize)) {
-		return 1;
-	}
-
-	return 0;
+	return write_file(outputFilePath, waveFile->waveHeader->header, waveFile->fileSize);
 }
 
 int validate_wave_file(struct wave_file* waveFile) {
@@ -73,21 +77,21 @@ int validate_wave_file(struct wave_file* waveFile) {
 	// You're gonna love this shit, it's beautiful!
 	// Just cast all the pointers to ints to read 4 bytes! Boom!
 	// No library or complex code needed!
-	if(*(int*)(waveFile->waveHeader->header+0) != *((int*)(riff))) {
+	if(*(int*)waveFile->waveHeader->fileContainer != *(int*)riff) {
 		printf("Not a RIFF compliant file\n");
-		// Doesn't make sense to continue if not RIFF file
+		// Doesn't make sense to continue checks if not RIFF file
 		return 0;
 	}
-	if(*(int*)(waveFile->waveHeader->header+8) != *((int*)(wave))) {
+	if(*(int*)waveFile->waveHeader->fileType != *(int*)wave) {
 		printf("Not a WAVE compliant file\n");
-		// Doesn't make sense to continue if not WAVE file
+		// Doesn't make sense to continue checks if not WAVE file
 		return 0;
 	}
-	if(*(int*)(waveFile->waveHeader->header+12) != *((int*)(fmt))) {
+	if(*(int*)waveFile->waveHeader->formatChunk != *(int*)fmt) {
 		printf("Wave file's format is not supported\n");
 		isValid = 0;
 	}
-	if(*(int*)(waveFile->waveHeader->header+36) != *((int*)(data))) {
+	if(*(int*)waveFile->waveHeader->dataLabel != *(int*)data) {
 		printf("Wave file's data header is not in assumed spot\n");
 		isValid = 0;
 	}
@@ -105,7 +109,7 @@ int validate_wave_file(struct wave_file* waveFile) {
 		isValid = 0;
 	}
 	if(waveFile->waveHeader->assumedSize != correctSize) {
-		printf("Wave file's size (%d) does not match assumed size (%d)\n", waveFile->fileSize, correctSize);
+		printf("Wave file's size (%d) does not match assumed size (%d)\n", waveFile->waveHeader->assumedSize, correctSize);
 		isValid = 0;
 	}
 

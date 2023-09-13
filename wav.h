@@ -3,10 +3,10 @@
 
 struct wave_header {
 	char* header;
-	char fileContainer[5]; // Bytes 0-3
+	char* fileContainer; // Bytes 0-3
 	unsigned int assumedSize; // Bytes 4-7
-	char fileType[5]; // Bytes 8-11
-	char formatChunk[5]; // Bytes 12-15
+	char* fileType; // Bytes 8-11
+	char* formatChunk; // Bytes 12-15
 	unsigned int formatLength; // Bytes 16-19 
 	unsigned short formatType; // Bytes 20-21
 	unsigned short channels; // Bytes 22-23
@@ -14,7 +14,7 @@ struct wave_header {
 	unsigned int bytesPerSecond; // Bytes 28-31
 	unsigned short bytesPerSample; // Bytes 32-33
 	unsigned short bitsPerSample; // Bytes 34-35
-	char dataLabel[5];  // Bytes 36-39 
+	char* dataLabel;  // Bytes 36-39 
 	unsigned int dataSize; // Bytes 40-43
 };
 
