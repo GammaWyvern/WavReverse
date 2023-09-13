@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <stdio.h>
 #include "wav.h"
 
@@ -10,22 +9,22 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	// Create Wave file data
+	// Load wave file data
 	struct wave_file* waveFile = load_wave(argv[1]);
 
-	// Verify Wave file data (contains NULL check)
+	// Verify wave file data (contains NULL check)
 	if(!validate_wave_file(waveFile)) {
 		free_wave_file(waveFile);
 		return 1;
 	}
 
-	// Reverse Wave file data and output to file
+	// Reverse wave file data and output to file
 	if(reverse_wave_file(waveFile, argv[2])) {
 		free_wave_file(waveFile);
 		return 1;
 	}
 
-	// Deallocate memory for waveFile if no error
+	// Deallocate memory for wave file if no error
 	free_wave_file(waveFile);
 	return 0;
 }
