@@ -11,7 +11,7 @@ struct wave_file* load_wave(const char* filePath) {
 	}
 
 	// Setup waveFile
-	struct wave_file* waveFile = malloc(sizeof(struct wave_file));
+	struct wave_file* waveFile = malloc(sizeof(*waveFile));
 	waveFile->waveHeader = create_wave_header(waveByteData);
 	waveFile->fileSize = size;
 	waveFile->dataPointer = waveByteData + 44;
@@ -20,7 +20,7 @@ struct wave_file* load_wave(const char* filePath) {
 }
 
 struct wave_header* create_wave_header(char* headerData) {
-	struct wave_header* waveFileHeader = malloc(sizeof(struct wave_header));
+	struct wave_header* waveFileHeader = malloc(sizeof(*waveFileHeader));
 	waveFileHeader->header = headerData;
 	waveFileHeader->fileContainer = (headerData+0);
 	waveFileHeader->assumedSize = *(unsigned int*)(headerData+4);
@@ -43,7 +43,7 @@ int reverse_wave_file(struct wave_file* waveFile, const char* outputFilePath) {
 	// Setup pointers to shift around samples
 	char* swapByteDataLower = waveFile->dataPointer;
 	char* swapByteDataUpper = waveFile->dataPointer + waveFile->waveHeader->dataSize - waveFile->waveHeader->bytesPerSample;
-	char* swapByteDataTemp = malloc(waveFile->waveHeader->bytesPerSample*sizeof(char)); 
+	char* swapByteDataTemp = malloc(waveFile->waveHeader->bytesPerSample*sizeof(*swapByteDataTemp)); 
 
 	// Swap around samples byte by byte to reverse their order
 	while(swapByteDataLower < swapByteDataUpper) {
