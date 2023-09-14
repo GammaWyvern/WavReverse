@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "wav.h"
 #include "file_lib.h"
 
@@ -41,22 +42,20 @@ struct wave_header* create_wave_header(char* headerData) {
 
 int reverse_wave_file(struct wave_file* waveFile, const char* outputFilePath) {
 	// Setup pointers to shift around samples
-	char* swapByteDataLower = waveFile->dataPointer;
-	char* swapByteDataUpper = waveFile->dataPointer + waveFile->waveHeader->dataSize - waveFile->waveHeader->bytesPerSample;
-	char* swapByteDataTemp = malloc(waveFile->waveHeader->bytesPerSample*sizeof(*swapByteDataTemp)); 
+	char* swapSampleLower = waveFile->dataPointer;
+	char* swapSampleUpper = waveFile->dataPointer + waveFile->waveHeader->dataSize - waveFile->waveHeader->bytesPerSample;
+	char* swapSampleTemp = malloc(waveFile->waveHeader->bytesPerSample*sizeof(*swapSampleTemp)); 
 
 	// Swap around samples byte by byte to reverse their order
-	while(swapByteDataLower < swapByteDataUpper) {
-		for(int sampleByte=0; sampleByte<waveFile->waveHeader->bytesPerSample; sampleByte++) {
-			swapByteDataTemp[sampleByte] = swapByteDataLower[sampleByte]; 
-			swapByteDataLower[sampleByte] = swapByteDataUpper[sampleByte]; 
-			swapByteDataUpper[sampleByte] = swapByteDataTemp[sampleByte]; 
-		}
+	while(swapSampleLower < swapSampleUpper) {
+		memcpy(swapSampleTemp, swapSampleLower, waveFile->waveHeader->bytesPerSample);
+		memcpy(swapSampleLower, swapSampleUpper, waveFile->waveHeader->bytesPerSample);
+		memcpy(swapSampleUpper, swapSampleTemp, waveFile->waveHeader->bytesPerSample);
 
-		swapByteDataLower += waveFile->waveHeader->bytesPerSample;
-		swapByteDataUpper -= waveFile->waveHeader->bytesPerSample;
+		swapSampleLower += waveFile->waveHeader->bytesPerSample;
+		swapSampleUpper -= waveFile->waveHeader->bytesPerSample;
 	}
-	free(swapByteDataTemp);
+	free(swapSampleTemp);
 	
 	// Output reversed wavByteData new file 
 	return write_file(outputFilePath, waveFile->waveHeader->header, waveFile->fileSize);
