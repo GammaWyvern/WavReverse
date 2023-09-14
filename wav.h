@@ -110,15 +110,4 @@ int validate_wave_file(struct wave_file* waveFile);
  **********************************************************/
 void free_wave_file(struct wave_file* waveFile);
 
-/***********************************************************
- *
- * Frees all memory allocated from a wave_header created
- * with create_wave_header().
- *
- * Args:
- * 	waveHeader: A pointer to the wave_header to free  
- *
- **********************************************************/
-void free_wave_file(struct wave_file* waveFile);
-
 #endif

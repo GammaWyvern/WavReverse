@@ -125,10 +125,3 @@ void free_wave_file(struct wave_file* waveFile) {
 	}
 }
 
-void free_wave_header(struct wave_header* waveHeader) {
-	if(waveHeader != NULL) {
-		free(waveHeader->header);
-		free(waveHeader);
-	}
-}
-
