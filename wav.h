@@ -28,8 +28,6 @@ struct wave_file {
  *
  * Creates a wave_header from a wave byte data array.
  * Use read_file() to easily get a wave byte data array.  
- * Use free_wave_header() when finished to free all
- * related memeory allocated.
  *
  * Args:
  * 	headerData: A pointer to 44 bytes of wave header data
@@ -59,10 +57,13 @@ struct wave_file* load_wave(const char* filePath);
 /***********************************************************
  *
  * Reverses the samples in a wave_file and writes the
- * newly altered wave_file to the file path passed.
+ * newly altered wave_file to the file path passed without
+ * permanently changing wave_file data.
  *
  * Args:
  * 	waveFile: A pointer to a wave_file to reverse samples in
+ * 		USE validate_wave_file FIRST before calling
+ * 		this function on a wave_file
  * 	filePath: file path to output reversed waveFile to
  *
  * Return:

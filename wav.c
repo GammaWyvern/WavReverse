@@ -41,24 +41,30 @@ struct wave_header* create_wave_header(char* headerData) {
 }
 
 int reverse_wave_file(struct wave_file* waveFile, const char* outputFilePath) {
-	// Setup pointers to shift around samples
-	char* swapSampleLower = waveFile->dataPointer;
-	char* swapSampleUpper = waveFile->dataPointer + waveFile->waveHeader->dataSize - waveFile->waveHeader->bytesPerSample;
-	char* swapSampleTemp = malloc(waveFile->waveHeader->bytesPerSample*sizeof(*swapSampleTemp)); 
+	// Setup data copy to use and copy back after reversing waveFile
+	char* waveFileDataCopy = malloc(waveFile->waveHeader->dataSize);
+	memcpy(waveFileDataCopy, waveFile->dataPointer, waveFile->waveHeader->dataSize);
 
-	// Swap around samples byte by byte to reverse their order
-	while(swapSampleLower < swapSampleUpper) {
-		memcpy(swapSampleTemp, swapSampleLower, waveFile->waveHeader->bytesPerSample);
-		memcpy(swapSampleLower, swapSampleUpper, waveFile->waveHeader->bytesPerSample);
-		memcpy(swapSampleUpper, swapSampleTemp, waveFile->waveHeader->bytesPerSample);
+	// Setup pointer / offsets to shift around samples
+	int swapSampleOffset = 0;
+	int middleSampleOffset = waveFile->waveHeader->dataSize / 2;
+	char* waveFileLastSample = waveFile->dataPointer + waveFile->waveHeader->dataSize - waveFile->waveHeader->bytesPerSample;
 
-		swapSampleLower += waveFile->waveHeader->bytesPerSample;
-		swapSampleUpper -= waveFile->waveHeader->bytesPerSample;
+	// Swap around samples to reverse their order
+	while(swapSampleOffset < middleSampleOffset) {
+		memcpy(waveFile->dataPointer+swapSampleOffset, waveFileLastSample-swapSampleOffset, waveFile->waveHeader->bytesPerSample); 
+		memcpy(waveFileLastSample-swapSampleOffset, waveFileDataCopy+swapSampleOffset, waveFile->waveHeader->bytesPerSample);
+
+		swapSampleOffset += waveFile->waveHeader->bytesPerSample;
 	}
-	free(swapSampleTemp);
 	
-	// Output reversed wavByteData new file 
-	return write_file(outputFilePath, waveFile->waveHeader->header, waveFile->fileSize);
+	// Output reversed waveFile to output file 
+	int error = write_file(outputFilePath, waveFile->waveHeader->header, waveFile->fileSize);
+	// Copy back original waveFileData back to waveFile
+	memcpy(waveFile->dataPointer, waveFileDataCopy, waveFile->waveHeader->dataSize);
+	// Free up used mem for copy
+	free(waveFileDataCopy);
+	return error;
 }
 
 int validate_wave_file(struct wave_file* waveFile) {
@@ -77,21 +83,21 @@ int validate_wave_file(struct wave_file* waveFile) {
 	// You're gonna love this shit, it's beautiful!
 	// Just cast all the pointers to ints to read 4 bytes! Boom!
 	// No library or complex code needed!
-	if(*(int*)waveFile->waveHeader->fileContainer != *(int*)riff) {
+	if(memcmp(riff, waveFile->waveHeader->fileContainer, 4)) {
 		printf("Not a RIFF compliant file\n");
 		// Doesn't make sense to continue checks if not RIFF file
 		return 0;
 	}
-	if(*(int*)waveFile->waveHeader->fileType != *(int*)wave) {
+	if(memcmp(wave, waveFile->waveHeader->fileType, 4)) {
 		printf("Not a WAVE compliant file\n");
 		// Doesn't make sense to continue checks if not WAVE file
 		return 0;
 	}
-	if(*(int*)waveFile->waveHeader->formatChunk != *(int*)fmt) {
+	if(memcmp(fmt, waveFile->waveHeader->formatChunk, 4)) {
 		printf("Wave file's format is not supported\n");
 		isValid = 0;
 	}
-	if(*(int*)waveFile->waveHeader->dataLabel != *(int*)data) {
+	if(memcmp(data, waveFile->waveHeader->dataLabel, 4)) {
 		printf("Wave file's data header is not in assumed spot\n");
 		isValid = 0;
 	}
