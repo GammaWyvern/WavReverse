@@ -68,8 +68,8 @@ struct wave_file* load_wave(const char* filePath);
  *
  * Return:
  * 	0 if waveFile was succesfully reversed and written
- * 		back to filePath
- * 	1 if waveFile was sucesfully reversed but not 
+ * 		to filePath
+ * 	1 if waveFile was not sucesfully reversed and 
  * 		written to filePath
  *
  **********************************************************/
